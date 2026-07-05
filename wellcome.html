@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Porsche Midnight Archive — Blue Archive Entry Portal.">
+    <title>PORSCHE | Blue Archive Entry</title>
+
+    <!-- Resource hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- importmap MUST precede all module scripts -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        :root {
+            --porsche-blue: #0066ff;
+            --glow: rgba(0, 102, 255, 0.3);
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #antigravity-canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        /* ── Scanline overlay ───────────────────────────────────────── */
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 5;
+            background: linear-gradient(0deg, transparent, rgba(0, 102, 255, 0.1), transparent);
+            position: absolute;
+            top: -100px;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        @keyframes scan {
+            to {
+                top: 100vh;
+            }
+        }
+
+        /* ── Content gate ───────────────────────────────────────────── */
+        .content-gate {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 10%, rgba(0, 0, 0, 0.7) 100%);
+            pointer-events: none;
+        }
+
+        /* ── Entry button ───────────────────────────────────────────── */
+        .enter-btn {
+            position: relative;
+            padding: 20px 60px;
+            background: transparent;
+            border: 1px solid rgba(0, 102, 255, 0.3);
+            overflow: hidden;
+            transition: border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                letter-spacing 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+        }
+
+        .enter-btn:hover {
+            border-color: var(--porsche-blue);
+            letter-spacing: 5px;
+            box-shadow: 0 0 40px var(--glow);
+        }
+
+        /* ── Loading bar ────────────────────────────────────────────── */
+        .loading-bar-container {
+            width: 200px;
+            height: 2px;
+            background: rgba(0, 102, 255, 0.1);
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar-progress {
+            width: 0%;
+            height: 100%;
+            background: var(--porsche-blue);
+            position: absolute;
+            animation: load 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+
+        @keyframes load {
+            to {
+                width: 100%;
+            }
+        }
+
+        /* ── Fade-in elements ───────────────────────────────────────── */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 2s forwards 2.2s;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-grid">
+
+    <div class="scanline" aria-hidden="true"></div>
+    <canvas id="antigravity-canvas" aria-hidden="true"></canvas>
+
+    <main class="content-gate">
+        <div class="text-center mb-12">
+            <p class="text-[8px] tracking-[1.2em] text-blue-500 uppercase mb-4 font-bold drop-shadow-md">
+                Stuttgart Blue Archive
+            </p>
+            <h1 class="font-sync text-5xl md:text-8xl italic tracking-tighter uppercase text-white drop-shadow-lg">
+                Midnight<br>
+                <span class="text-blue-900">Archive</span>
+            </h1>
+        </div>
+
+        <div id="loader" class="flex flex-col items-center" aria-live="polite" role="status">
+            <span class="text-[9px] font-mono tracking-[0.4em] text-blue-800 uppercase drop-shadow-md">
+                System_Link_Initializing...
+            </span>
+            <div class="loading-bar-container" role="progressbar" aria-valuenow="0" aria-valuemax="100"
+                aria-label="Loading progress">
+                <div class="loading-bar-progress"></div>
+            </div>
+        </div>
+
+        <div class="fade-in">
+            <button id="enter-btn" class="enter-btn group backdrop-blur-sm" aria-label="Enter the archive">
+                <span class="text-[10px] font-black uppercase tracking-[0.8em] text-white">Entry Protocol</span>
+                <div class="absolute inset-0 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left mix-blend-screen opacity-20"
+                    aria-hidden="true"></div>
+            </button>
+        </div>
+
+        <div class="absolute bottom-10 w-full px-12 flex justify-between items-end fade-in drop-shadow-md"
+            aria-hidden="true">
+            <div class="text-[7px] font-mono text-blue-300 uppercase leading-loose">
+                Model: 911_S/T_2024<br>
+                Color_Spec: Shark_Blue_Alt<br>
+                Status: Verified
+            </div>
+            <div class="text-[7px] font-mono text-blue-400 uppercase italic tracking-widest">
+                Blue Archive // System Entry 5.2
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initAntigravity } from './antigravity.js';
+
+        const canvas = document.getElementById('antigravity-canvas');
+        const cleanup = await initAntigravity(canvas);
+
+        /* ── Entry transition ── */
+        document.getElementById('enter-btn').addEventListener('click', () => {
+            document.body.style.cssText =
+                'filter:brightness(2) contrast(2) saturate(0);opacity:0;transition:1.5s ease-in;';
+            setTimeout(() => {
+                cleanup?.dispose();
+                window.location.href = 'index.html';
+            }, 1000);
+        }, { once: true });
+
+        /* ── Fade out loader after bar completes ── */
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.opacity = '0.3';
+                loader.style.transition = '1s';
+            }
+        }, 2600);
+    </script>
+    <script src="cursor.js"></script>
+</body>
+
+</html>

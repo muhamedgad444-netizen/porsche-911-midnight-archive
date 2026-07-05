@@ -1,0 +1,10 @@
+{
+  "name": "porsche-midnight-archive",
+  "version": "1.0.0",
+  "description": "Porsche Midnight Archive serverless backend",
+  "type": "module",
+  "main": "api/products.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.8"
+  }
+}

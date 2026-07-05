@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Porsche Midnight Archive — Full collection assortment.">
+    <title>PORSCHE | Midnight Collection</title>
+
+    <!-- Resource hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- importmap MUST precede all module scripts -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three":        "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three-engine": "./three-engine.js"
+        }
+    }
+    </script>
+
+    <style>
+        :root {
+            --porsche-border: rgba(255, 255, 255, 0.08);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ── Navigation ────────────────────────────────────────────── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--porsche-border);
+            padding: 2rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo-main {
+            font-size: 11px;
+            letter-spacing: 0.8em;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        /* ── Hero video ────────────────────────────────────────────── */
+        .chamfered-shape-large {
+            clip-path: polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px);
+        }
+
+        .hero-video-container {
+            position: relative;
+            width: 100%;
+            height: 60vh;
+            border: 1px solid #141414;
+            background: #000;
+            overflow: hidden;
+            transition: border-color 0.7s var(--ease-out-expo);
+        }
+
+        .hero-video-container:hover {
+            border-color: #333;
+        }
+
+        .hero-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(0.2) contrast(1.1);
+            opacity: 0.9;
+            transition: filter 1s ease, opacity 1s ease;
+            display: block;
+        }
+
+        .hero-video-container:hover video {
+            filter: grayscale(0) contrast(1);
+            opacity: 1;
+        }
+
+        /* ── Product Grid ──────────────────────────────────────────── */
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 4rem;
+            padding: 2rem 0 5rem;
+        }
+
+        @media (min-width: 768px) {
+            .archive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .archive-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ── Garage Panel ──────────────────────────────────────────── */
+        .garage-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 100%;
+            max-width: 500px;
+            background: #080808;
+            z-index: 2000;
+            border-left: 1px solid #1a1a1a;
+            transform: translateX(100%);
+            transition: transform 0.7s var(--ease-out-expo);
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+        }
+
+        body.garage-active::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1999;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            animation: overlayIn 0.4s ease forwards;
+        }
+
+        @keyframes overlayIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .garage-visual {
+            height: 40%;
+            background: #000;
+            position: relative;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        #garage-3d {
+            width: 100%;
+            height: 100%;
+            filter: grayscale(1) contrast(1.2);
+            pointer-events: none;
+        }
+
+        /* ── Back CTA arrow flip ───────────────────────────────────── */
+        .cta-back span {
+            padding-right: 0 !important;
+            padding-left: 15px !important;
+        }
+
+        .cta-back svg {
+            transform: rotate(180deg) translateX(-8px) !important;
+            position: relative;
+            top: 4px;
+        }
+
+        .cta-back:hover svg {
+            transform: rotate(180deg) translateX(0) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-grid" id="body">
+
+    <!-- ── Navigation ──────────────────────────────────────────────── -->
+    <nav id="main-nav" role="navigation" aria-label="Main navigation">
+        <div class="flex flex-col" id="nav-logo" role="link" tabindex="0" aria-label="Return to main archive">
+            <span class="nav-logo-main font-sync text-white">PORSCHE</span>
+            <span class="text-[7px] text-zinc-600 tracking-[0.4em] uppercase mt-1">Midnight Archive // Apparel</span>
+        </div>
+
+        <div class="flex items-center gap-12">
+            <button id="btn-garage"
+                class="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 hover:text-white transition-colors"
+                aria-expanded="false" aria-controls="garage-drawer" aria-label="Open garage panel">
+                Garage Access
+            </button>
+            <a href="checkout.html" id="bag-indicator"
+                class="bg-white text-black px-10 py-3 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                aria-label="View bag">
+                Bag (0)
+            </a>
+        </div>
+    </nav>
+
+    <!-- ── Garage Drawer ────────────────────────────────────────────── -->
+    <aside class="garage-panel" id="garage-drawer" aria-label="Garage panel" aria-hidden="true">
+        <div class="garage-visual">
+            <div id="garage-3d" aria-hidden="true"></div>
+            <button id="btn-garage-close"
+                class="absolute top-8 right-8 text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors"
+                aria-label="Close garage">
+                ✕ Close
+            </button>
+        </div>
+        <div class="p-12 flex-grow flex flex-col justify-center">
+            <h2 class="font-sync text-4xl italic uppercase tracking-tighter mb-12">Initialize Garage</h2>
+            <div class="space-y-10">
+                <div class="border-b border-zinc-900 pb-4">
+                    <label class="text-[8px] text-zinc-600 uppercase mb-2 block" for="serial-id-col">Serial ID</label>
+                    <input type="password" id="serial-id-col" placeholder="••••••••"
+                        class="w-full bg-transparent border-none outline-none text-white text-xs uppercase tracking-widest"
+                        autocomplete="current-password">
+                </div>
+                <button id="btn-verify"
+                    class="w-full bg-white text-black py-6 text-[11px] font-black uppercase tracking-[0.5em] hover:bg-zinc-200 transition-colors">
+                    Verify Manifest
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── Hero Video ───────────────────────────────────────────────── -->
+    <header class="w-full px-2 md:px-6 pt-32 relative z-10 mb-12">
+        <div class="hero-video-container chamfered-shape-large">
+            <video src="videoplayback.1774746221814.publer.com.mp4" autoplay loop muted playsinline preload="metadata"
+                aria-hidden="true"></video>
+
+            <div class="absolute bottom-4 left-4 right-4 md:bottom-10 md:left-10 md:right-10 pointer-events-none">
+                <p class="text-[8px] tracking-[0.6em] text-zinc-300 uppercase mb-2 font-mono ml-2 drop-shadow-md">
+                    Active Inventory: 16 Items</p>
+                <h1
+                    class="font-sync text-[10vw] xl:text-[11vw] 2xl:text-[210px] italic uppercase tracking-tighter flex flex-col leading-[0.75] w-full">
+                    <span class="text-white drop-shadow-2xl z-20">MIDNIGHT</span>
+                    <span
+                        class="text-[#151515] drop-shadow-lg z-10 relative -top-[1.5vw] xl:-top-[2vw] 2xl:-top-10">COLLECTION</span>
+                </h1>
+            </div>
+
+            <div class="absolute top-10 right-10 pointer-events-none flex items-center gap-2" aria-hidden="true">
+                <div class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
+                <span class="text-[7px] text-white font-mono uppercase tracking-widest drop-shadow-md">Rec_Active</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── Archive Grid ─────────────────────────────────────────────── -->
+    <main class="max-w-[1600px] mx-auto px-6 md:px-12">
+        <div class="flex justify-between items-end mb-10 border-b border-zinc-900 pb-6 relative z-10">
+            <div>
+                <h2 class="font-sync text-2xl uppercase italic tracking-tighter">Full Assortment</h2>
+                <p class="text-[9px] text-zinc-600 uppercase tracking-widest mt-2">Logistics ready for deployment</p>
+            </div>
+        </div>
+
+        <div class="archive-grid relative z-10" id="product-container"></div>
+
+        <div class="flex justify-center mt-20 mb-10 relative z-10">
+            <a href="index.html" class="cta cta-back" aria-label="Return to main archive">
+                <svg viewBox="0 0 46 16" height="10" width="30" fill="white" aria-hidden="true">
+                    <path d="M8,0,6.545,1.455l5.506,5.506H-30V9.039H12.052L6.545,14.545,8,16l8-8Z"></path>
+                </svg>
+                <span class="hover-underline-animation">Return to Main Archive</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- ── Footer ───────────────────────────────────────────────────── -->
+    <footer class="bg-black py-40 px-12 border-t border-zinc-900 mt-20">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-32">
+            <div>
+                <h4 class="font-sync text-[10px] tracking-widest text-zinc-500 mb-8">Technical Summary</h4>
+                <p class="text-[10px] text-zinc-600 leading-relaxed uppercase tracking-widest">
+                    The Midnight Collection represents the pinnacle of archival apparel engineering.
+                </p>
+                <a href="admin.html"
+                    class="text-[8px] text-zinc-800 uppercase tracking-widest mt-8 block hover:text-zinc-500 transition-colors">
+                    System Terminal // Override
+                </a>
+            </div>
+            <div class="flex flex-col justify-between items-end md:col-start-3">
+                <span class="font-sync text-5xl italic text-zinc-900 leading-none">GT3-2026</span>
+                <p class="text-[8px] text-zinc-800 font-mono uppercase mt-12">© 2026 Porsche Archive Systems</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Non-module scripts first -->
+    <script src="script.js"></script>
+    <script src="cursor.js"></script>
+
+    <script type="module">
+        import { GlobalThreeEngine } from './three-engine.js';
+
+        /* ── Nav logo → index ── */
+        const navLogo = document.getElementById('nav-logo');
+        navLogo.addEventListener('click', () => { location.href = 'index.html'; });
+        navLogo.addEventListener('keydown', e => { if (e.key === 'Enter') location.href = 'index.html'; });
+
+        /* ── Garage toggle (lazy-load 3D on first open) ── */
+        let garageLoaded = false;
+        const btnGarage = document.getElementById('btn-garage');
+        const btnGarageClose = document.getElementById('btn-garage-close');
+        const btnVerify = document.getElementById('btn-verify');
+
+        function toggleGarage() {
+            if (!garageLoaded) {
+                garageLoaded = true;
+                GlobalThreeEngine.init('garage-3d', './garageui/scene.gltf', {
+                    autoRotate: true, cameraZ: 6, scale: 3.8,
+                });
+            }
+            window.GarageSystem.toggle();
+            const isOpen = document.getElementById('body').classList.contains('garage-active');
+            btnGarage.setAttribute('aria-expanded', isOpen.toString());
+        }
+
+        btnGarage.addEventListener('click', toggleGarage);
+        btnGarageClose.addEventListener('click', toggleGarage);
+        btnVerify.addEventListener('click', toggleGarage);
+    </script>
+</body>
+
+</html>

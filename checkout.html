@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Porsche Midnight Archive — Checkout and logistics protocol.">
+    <title>DEPLOYMENT // PORSCHE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three":        "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three-engine": "./three-engine.js"
+        }
+    }
+    </script>
+
+    <style>
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .font-sync {
+            font-family: 'Syncopate', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ── Inputs ────────────────────────────────────────────────── */
+        input {
+            width: 100%;
+            background: #080808;
+            border: 1px solid #111;
+            padding: 1.2rem;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            outline: none;
+            color: white;
+            transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 4px;
+        }
+
+        input:focus {
+            border-color: #5227FF;
+            background: #0a0a0a;
+            box-shadow: 0 0 20px rgba(82, 39, 255, 0.1);
+        }
+
+        /* ── Step phases ───────────────────────────────────────────── */
+        .step-phase {
+            display: none;
+        }
+
+        .step-phase.active {
+            display: block;
+            animation: cubic-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cubic-reveal {
+            from {
+                opacity: 0;
+                filter: blur(10px);
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Glass nav dock ────────────────────────────────────────── */
+        .glass-dock {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            background: rgba(5, 5, 5, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            will-change: transform;
+        }
+
+        .step-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #444;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            transition: color 0.4s ease;
+            text-transform: uppercase;
+        }
+
+        .step-pill.active {
+            color: #fff;
+        }
+
+        .step-pill .num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #222;
+            background: transparent;
+            transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+        }
+
+        .step-pill.active .num {
+            background: #5227FF;
+            color: white;
+            border-color: #5227FF;
+            box-shadow: 0 0 15px rgba(82, 39, 255, 0.4);
+        }
+
+        .step-line {
+            width: 30px;
+            height: 1px;
+            background: #222;
+            transition: background 0.4s;
+        }
+
+        .step-pill.active+.step-line {
+            background: rgba(82, 39, 255, 0.5);
+        }
+
+        /* ── Method cards (Logistics) ──────────────────────────────── */
+        .method-card {
+            border: 1px solid #111;
+            background: #080808;
+            padding: 20px;
+            transition: border-color 0.4s, background 0.4s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .method-card.selected {
+            border-color: #5227FF;
+            background: #0a0a0a;
+        }
+
+        .method-card input {
+            display: none;
+        }
+
+        .method-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: #5227FF;
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .method-card.selected::after {
+            opacity: 1;
+        }
+
+        /* ── 3D visual frame ───────────────────────────────────────── */
+        .visual-frame {
+            height: 450px;
+            background: transparent;
+            border: none;
+            position: relative;
+        }
+
+        #checkout-3d {
+            width: 100%;
+            height: 100%;
+            background: transparent !important;
+        }
+
+        /* ── WALLET UI ANIMATION ───────────────────────────────────── */
+        .wallet {
+            position: relative;
+            width: 280px;
+            height: 230px;
+            cursor: pointer;
+            perspective: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            transition: transform 0.4s ease;
+        }
+        
+        @keyframes slideIntoPocket {
+            0% { transform: translateY(-100px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .wallet-back {
+            position: absolute;
+            bottom: 0;
+            width: 280px;
+            height: 200px;
+            background: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 22px 22px 60px 60px;
+            z-index: 5;
+            box-shadow: inset 0 25px 35px rgba(0, 0, 0, 0.4), inset 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .card {
+            position: absolute;
+            width: 260px;
+            height: 140px;
+            left: 10px;
+            border-radius: 16px;
+            padding: 18px;
+            color: white;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 -4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s, border-color 0.3s;
+            animation: slideIntoPocket 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+            border: 1px solid transparent;
+        }
+
+        .card.active-card {
+            border-color: #5227FF;
+            box-shadow: 0 0 20px rgba(82, 39, 255, 0.3);
+        }
+
+        .card-inner {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .chip {
+            width: 32px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .label {
+            font-size: 8px;
+            opacity: 0.7;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .card-number-wrapper {
+            text-align: right;
+        }
+
+        .hidden-stars {
+            font-size: 16px;
+            letter-spacing: 2px;
+        }
+
+        .card-number {
+            display: none;
+            font-size: 14px;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Card variants styled for Porsche Theme */
+        .stripe {
+            background: #111111;
+            border: 1px solid #333;
+            bottom: 90px;
+            z-index: 10;
+            animation-delay: 0.1s;
+        }
+
+        .wise {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            bottom: 65px;
+            z-index: 20;
+            animation-delay: 0.2s;
+        }
+
+        .paypal {
+            background: #ffffff;
+            color: #050505;
+            bottom: 40px;
+            z-index: 30;
+            animation-delay: 0.3s;
+        }
+
+        .paypal .chip { background: rgba(0, 0, 0, 0.1); border-color: rgba(0, 0, 0, 0.2); }
+        .paypal .label { color: #555; }
+
+        /* Pocket overlay */
+        .pocket {
+            position: absolute;
+            bottom: 0;
+            width: 280px;
+            height: 100px;
+            z-index: 40;
+            background: #050505;
+            border-top: 1px solid #222;
+            border-radius: 0 0 60px 60px;
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wallet:hover { transform: translateY(-5px); }
+        .wallet:hover .stripe { transform: translateY(-75px) rotate(-3deg); }
+        .wallet:hover .wise { transform: translateY(-45px) rotate(2deg); }
+        .wallet:hover .paypal { transform: translateY(-10px); }
+
+        .card:hover {
+            z-index: 100 !important;
+            transition-delay: 0s !important;
+        }
+
+        .wallet:hover .stripe:hover { transform: translateY(-60px) scale(1.05) rotate(0); }
+        .wallet:hover .wise:hover { transform: translateY(-70px) scale(1.05) rotate(0); }
+        .wallet:hover .paypal:hover { transform: translateY(-60px) scale(1.05) rotate(0); }
+
+        .card:hover .hidden-stars { display: none; }
+        .card:hover .card-number { display: block; }
+
+    </style>
+</head>
+
+<body class="bg-grid min-h-screen">
+
+    <nav class="glass-dock" aria-label="Checkout steps" role="navigation">
+        <div class="step-pill active" id="dot-1" aria-current="step">
+            <span class="num">01</span>
+            <span class="hidden md:inline tracking-widest">Dest</span>
+        </div>
+        <div class="step-line" id="line-1"></div>
+        <div class="step-pill" id="dot-2">
+            <span class="num">02</span>
+            <span class="hidden md:inline tracking-widest">Logistics</span>
+        </div>
+        <div class="step-line" id="line-2"></div>
+        <div class="step-pill" id="dot-3">
+            <span class="num">03</span>
+            <span class="hidden md:inline tracking-widest">Auth</span>
+        </div>
+    </nav>
+
+    <header class="fixed top-0 w-full z-40 p-6 flex justify-between items-center pointer-events-none">
+        <a href="index.html"
+            class="text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all pointer-events-auto"
+            aria-label="Return to archive">
+            ← Return
+        </a>
+        <div class="flex items-center gap-4">
+            <span class="font-mono text-[10px] text-zinc-600">LN // 52.02.06</span>
+            <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse" aria-hidden="true"></div>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto pt-40 px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
+
+        <div class="lg:col-span-7 z-10">
+            <div class="mb-12">
+                <h1 class="font-sync text-5xl italic tracking-tighter uppercase leading-none">Logistics<br>
+                    <span class="text-zinc-900">Protocol</span>
+                </h1>
+            </div>
+
+            <form id="order-form" novalidate>
+
+                <div class="step-phase active" id="step-1">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="fname" required placeholder="FIRST NAME" autocomplete="given-name">
+                        <input type="text" id="lname" required placeholder="LAST NAME" autocomplete="family-name">
+                    </div>
+                    <input type="text" id="addr" class="mb-4" required placeholder="SHIPPING ADDRESS"
+                        autocomplete="street-address">
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <input type="text" id="city" required placeholder="CITY" autocomplete="address-level2">
+                        <input type="text" id="zip" required placeholder="POSTAL CODE" autocomplete="postal-code">
+                    </div>
+                    <button type="button" id="next-1"
+                        class="w-full bg-white text-black h-20 text-[11px] font-black uppercase tracking-[0.4em] hover:bg-zinc-200 transition-colors flex items-center justify-center gap-4">
+                        Next Sequence <span class="font-mono text-[16px]">→</span>
+                    </button>
+                </div>
+
+                <div class="step-phase" id="step-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div class="method-card selected" id="opt-standard" role="radio" aria-checked="true"
+                            tabindex="0">
+                            <span class="block text-[10px] font-black uppercase tracking-widest mb-2">Standard</span>
+                            <span class="block text-[12px] font-mono text-zinc-500">72h Delivery / Free</span>
+                        </div>
+                        <div class="method-card" id="opt-priority" role="radio" aria-checked="false" tabindex="0">
+                            <span class="block text-[10px] font-black uppercase tracking-widest mb-2">Priority</span>
+                            <span class="block text-[12px] font-mono text-zinc-500">24h Express / $45</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" id="back-2"
+                            class="w-20 h-20 border border-zinc-900 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+                            aria-label="Back to destination">←</button>
+                        <button type="button" id="next-2"
+                            class="flex-grow bg-white text-black h-20 text-[11px] font-black uppercase tracking-[0.4em] hover:bg-zinc-200 transition-colors">
+                            Payment Authorization
+                        </button>
+                    </div>
+                </div>
+
+                <div class="step-phase" id="step-3">
+                    
+                    <div class="wallet mx-auto mb-16">
+                        <div class="wallet-back"></div>
+                        
+                        <div class="card stripe active-card" id="pay-visa" onclick="togglePaymentFields('visa')">
+                            <div class="card-inner">
+                                <div class="card-top"><span>VISA</span><div class="chip"></div></div>
+                                <div class="card-bottom">
+                                    <div><span class="label">CREDIT</span></div>
+                                    <div class="card-number-wrapper">
+                                        <span class="hidden-stars">**** ****</span>
+                                        <span class="card-number font-mono">**** 4242</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card wise" id="pay-instapay" onclick="togglePaymentFields('instapay')">
+                            <div class="card-inner">
+                                <div class="card-top"><span>INSTAPAY</span><div class="chip"></div></div>
+                                <div class="card-bottom">
+                                    <div><span class="label">DIRECT</span></div>
+                                    <div class="card-number-wrapper">
+                                        <span class="hidden-stars">**** ****</span>
+                                        <span class="card-number">IPA TRANSFER</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card paypal" id="pay-cod" onclick="togglePaymentFields('cod')">
+                            <div class="card-inner">
+                                <div class="card-top"><span>C.O.D.</span><div class="chip"></div></div>
+                                <div class="card-bottom">
+                                    <div><span class="label">CASH</span></div>
+                                    <div class="card-number-wrapper">
+                                        <span class="hidden-stars">**** ****</span>
+                                        <span class="card-number text-[10px]">PAY ON ARRIVAL</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pocket">
+                            <span class="font-sync text-[9px] uppercase tracking-[0.4em] text-zinc-500">Porsche Pay</span>
+                        </div>
+                    </div>
+
+                    <div id="payment-fields-container" class="mb-12">
+                        <div id="fields-visa" class="space-y-4">
+                            <input type="text" placeholder="CARD SERIAL NUMBER" autocomplete="cc-number">
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="text" placeholder="EXP DATE" autocomplete="cc-exp">
+                                <input type="text" placeholder="CVV" autocomplete="cc-csc">
+                            </div>
+                        </div>
+                        <div id="fields-instapay" class="hidden p-8 bg-zinc-950 border border-zinc-900 rounded-lg">
+                            <span class="font-mono text-blue-500 text-[11px]">IPA: porsche.archive@instapay</span>
+                        </div>
+                        <div id="fields-cod" class="hidden p-8 bg-zinc-950 border border-zinc-900 rounded-lg">
+                            <span class="text-[10px] text-zinc-500 uppercase">Authorize on arrival.</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="button" id="back-3"
+                            class="w-20 h-20 border border-zinc-900 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+                            aria-label="Back to logistics">←</button>
+                        <button type="submit" id="final-btn"
+                            class="flex-grow bg-[#5227FF] text-white h-20 text-[11px] font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-colors">
+                            Execute Order
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="lg:col-span-5 space-y-8 z-0">
+            <div class="visual-frame">
+                <div id="checkout-3d"></div>
+            </div>
+
+            <div class="bg-[#080808] border border-zinc-900 p-10 rounded-xl shadow-2xl">
+                <div class="flex justify-between items-center mb-10">
+                    <span class="font-sync text-[12px] text-white italic tracking-widest uppercase">Manifest</span>
+                    <span id="item-count-badge"
+                        class="font-mono text-[10px] px-3 py-1 bg-zinc-900 text-zinc-500 rounded-full">0 ITEMS</span>
+                </div>
+                <div id="cart-items" class="space-y-6 max-h-[250px] overflow-y-auto pr-4 mb-10"></div>
+                <div class="space-y-4 pt-8 border-t border-zinc-900">
+                    <div class="flex justify-between font-mono text-[11px] text-zinc-500 uppercase">
+                        <span>Logistics Surcharge</span>
+                        <span id="shipping-price">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="font-sync text-[10px] text-white tracking-widest uppercase">Total Manifest
+                            Value</span>
+                        <span id="total-price" class="font-mono text-2xl text-white font-bold">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        'use strict';
+
+        /* ── Fallback SVG ── */
+        const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='64'%3E%3Crect fill='%231a1a1a' width='48' height='64'/%3E%3C/svg%3E";
+
+        /* ── Cart helpers ── */
+        function getCart() { try { return JSON.parse(localStorage.getItem('porsche_cart')) || []; } catch { return []; } }
+        function setCart(arr) { try { localStorage.setItem('porsche_cart', JSON.stringify(arr)); } catch { } }
+
+        /* ── State ── */
+        let currentStep = 1;
+        let shippingCost = 0;
+        let subtotal = 0;
+
+        /* ── Step navigation ── */
+        function changeStep(step) {
+            // Validate step 1 before proceeding
+            if (step > currentStep && currentStep === 1) {
+                if (!document.getElementById('fname').value.trim()) {
+                    document.getElementById('fname').focus();
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.step-phase').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            document.querySelectorAll('.step-pill').forEach((el, i) => {
+                el.classList.toggle('active', i + 1 <= step);
+                el.setAttribute('aria-current', i + 1 === step ? 'step' : 'false');
+            });
+
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ── Button wiring ── */
+        document.getElementById('next-1').addEventListener('click', () => changeStep(2));
+        document.getElementById('back-2').addEventListener('click', () => changeStep(1));
+        document.getElementById('next-2').addEventListener('click', () => changeStep(3));
+        document.getElementById('back-3').addEventListener('click', () => changeStep(2));
+
+        /* ── Shipping options ── */
+        function updateShipping(cost, id) {
+            shippingCost = cost;
+            document.querySelectorAll('.method-card[id^="opt-"]').forEach(el => {
+                el.classList.remove('selected');
+                el.setAttribute('aria-checked', 'false');
+            });
+            const selected = document.getElementById(id);
+            selected.classList.add('selected');
+            selected.setAttribute('aria-checked', 'true');
+            updateTotalDisplay();
+        }
+        document.getElementById('opt-standard').addEventListener('click', () => updateShipping(0, 'opt-standard'));
+        document.getElementById('opt-priority').addEventListener('click', () => updateShipping(45, 'opt-priority'));
+
+        /* ── Payment methods (Wallet Integration) ── */
+        function togglePaymentFields(method) {
+            ['visa', 'instapay', 'cod'].forEach(m => {
+                const card = document.getElementById(`pay-${m}`);
+                const fields = document.getElementById(`fields-${m}`);
+                const active = m === method;
+                
+                // Add glowing border to selected wallet card
+                if(card) {
+                    card.classList.toggle('active-card', active);
+                }
+                
+                if(fields) fields.classList.toggle('hidden', !active);
+            });
+        }
+
+        /* ── Total display ── */
+        function updateTotalDisplay() {
+            document.getElementById('shipping-price').textContent = `$${shippingCost.toFixed(2)}`;
+            document.getElementById('total-price').textContent = `$${(subtotal + shippingCost).toFixed(2)}`;
+        }
+
+        /* ── Cart rendering ── */
+        function removeItem(index) {
+            const cart = getCart();
+            cart.splice(index, 1);
+            setCart(cart);
+            renderCart();
+        }
+
+        function renderCart() {
+            const cart = getCart();
+            const container = document.getElementById('cart-items');
+            subtotal = 0;
+            document.getElementById('item-count-badge').textContent = `${cart.length} ITEMS`;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="font-mono text-[10px] text-zinc-800 uppercase">Empty Archive</p>';
+                updateTotalDisplay();
+                return;
+            }
+
+            container.innerHTML = cart.map((item, index) => {
+                subtotal += item.price;
+                return `
+                    <div class="flex justify-between items-center group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-16 bg-zinc-900 overflow-hidden rounded flex-shrink-0">
+                                <img src="${item.img}" class="w-full h-full object-cover grayscale" loading="lazy"
+                                     onerror="this.onerror=null;this.src='${PLACEHOLDER_SVG}'" alt="${item.name}">
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-black uppercase tracking-widest text-white">${item.name}</span>
+                                <span class="block font-mono text-[9px] text-zinc-600 italic">Size: ${item.selectedSize}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="block font-mono text-[11px] text-zinc-400">$${item.price}</span>
+                            <button data-remove="${index}" class="text-[8px] text-zinc-700 uppercase hover:text-red-500 transition-colors">Remove</button>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            updateTotalDisplay();
+        }
+
+        // Delegated remove button
+        document.getElementById('cart-items').addEventListener('click', e => {
+            const btn = e.target.closest('[data-remove]');
+            if (btn) removeItem(parseInt(btn.dataset.remove));
+        });
+
+        /* ── Submit ── */
+        document.getElementById('order-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('final-btn');
+            
+            const first_name = document.getElementById('fname').value.trim();
+            const last_name = document.getElementById('lname').value.trim();
+            const address = document.getElementById('addr').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const postal_code = document.getElementById('zip').value.trim();
+            
+            const shipping_method = document.getElementById('opt-priority').classList.contains('selected') ? 'Priority' : 'Standard';
+            
+            let payment_method = 'Visa';
+            if (document.getElementById('pay-instapay').classList.contains('active-card')) {
+                payment_method = 'Instapay';
+            } else if (document.getElementById('pay-cod').classList.contains('active-card')) {
+                payment_method = 'Cash on Delivery';
+            }
+
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert('YOUR MANIFEST BAG IS EMPTY.');
+                return;
+            }
+
+            if (!first_name || !last_name || !address || !city || !postal_code) {
+                alert('PLEASE FILL OUT ALL SHIPPING FIELDS.');
+                return;
+            }
+
+            btn.textContent = 'EXECUTING...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name,
+                        last_name,
+                        address,
+                        city,
+                        postal_code,
+                        shipping_method,
+                        payment_method,
+                        total_price: subtotal + shippingCost,
+                        items: cart
+                    })
+                });
+
+                if (res.ok) {
+                    btn.textContent = 'MANIFESTED ✓';
+                    setTimeout(() => {
+                        localStorage.removeItem('porsche_cart');
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    const data = await res.json();
+                    alert(`ORDER ERROR: ${data.error || 'Server error'}`);
+                    btn.textContent = 'Execute Order';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Order submission failed:", err);
+                alert("ORDER EXECUTION FAILED. LOCAL FALLBACK RUNNING.");
+                setTimeout(() => {
+                    localStorage.removeItem('porsche_cart');
+                    window.location.href = 'index.html';
+                }, 1500);
+            }
+        });
+
+        /* ── Boot ── */
+        renderCart();
+    </script>
+
+    <script src="cursor.js"></script>
+
+    <script type="module">
+        import { GlobalThreeEngine } from './three-engine.js';
+        GlobalThreeEngine.init('checkout-3d', './gtr_model/porsche_911_st_final.ktx2.glb', {
+            autoRotate: true, cameraZ: 6,
+        });
+    </script>
+</body>
+
+</html>

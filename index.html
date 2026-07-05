@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Porsche Midnight Archive — Experimental high-velocity hardware.">
+    <title>PORSCHE | Midnight Archive</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three-engine": "./three-engine.js"
+        }
+    }
+    </script>
+</head>
+
+<body id="body" class="bg-grid">
+
+    <nav id="main-nav">
+        <div class="flex flex-col cursor-pointer" onclick="location.href='wellcome.html'">
+            <span class="font-sync text-[11px] tracking-[0.8em] uppercase italic">PORSCHE</span>
+            <span class="text-[7px] text-zinc-600 tracking-[0.4em] uppercase mt-1">Midnight Archive // Logistics</span>
+        </div>
+        <div class="flex items-center gap-12">
+            <button onclick="GarageSystem.toggle()" class="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 hover:text-white transition-all">Garage Access</button>
+            <a href="checkout.html" id="bag-indicator" class="bg-white text-black px-10 py-3 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all active:scale-95">Bag (0)</a>
+        </div>
+    </nav>
+
+    <section class="hero-viewport">
+        <div class="hero-model-container" id="hero-3d-container">
+            <div class="ui-overlay">
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
+                <div class="status-text">ARCHIVE_TYPE: 992_GT3 // TRACK_READY</div>
+            </div>
+        </div>
+        <div class="hero-content">
+            <div class="w-full relative">
+                <div class="absolute inset-0 bg-[#050505] blur-[60px] rounded-full scale-[1.2] -z-10 opacity-70 w-[60%]"></div>
+                <p class="text-[8px] tracking-[0.6em] text-zinc-500 uppercase mb-4 font-mono ml-2">System Initialized // Sequence 2026</p>
+                <h1 class="font-sync text-[5rem] md:text-[8rem] lg:text-[11rem] italic uppercase tracking-tighter flex flex-col leading-[0.75]">
+                    <span class="text-white drop-shadow-xl z-20">MIDNIGHT</span>
+                    <span class="text-[#151515] drop-shadow-md z-10 relative -top-3 md:-top-6 lg:-top-8">ARCHIVE</span>
+                </h1>
+            </div>
+        </div>
+    </section>
+
+    <main class="main-archive">
+        <div class="flex justify-between items-end mb-20 px-4">
+            <div>
+                <h3 class="font-sync text-2xl uppercase italic tracking-tighter">Archive Inventory</h3>
+                <p class="text-[9px] text-zinc-600 uppercase tracking-widest mt-2">Experimental high-velocity hardware</p>
+            </div>
+        </div>
+
+        <div class="archive-grid" id="product-container"></div>
+
+        <div class="flex justify-center mt-32 mb-20">
+            <a href="collections.html" class="cta">
+                <span class="hover-underline-animation">Access Collection Full Assortment</span>
+                <svg viewBox="0 0 46 16" height="10" width="30" fill="white">
+                    <path d="M8,0,6.545,1.455l5.506,5.506H-30V9.039H12.052L6.545,14.545,8,16l8-8Z"></path>
+                </svg>
+            </a>
+        </div>
+    </main>
+
+    <aside id="garage-drawer" aria-hidden="true" class="fixed top-0 right-0 w-full md:w-[700px] h-full bg-[#050505] border-l border-[#1a1a1a] z-[2000] flex flex-col transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] translate-x-full">
+        <div class="p-8 border-b border-[#1a1a1a] flex justify-between items-center bg-black/50 backdrop-blur-md">
+            <div>
+                <h2 class="font-sync text-2xl italic uppercase tracking-tighter text-white">Garage</h2>
+                <span class="text-[8px] tracking-[0.4em] text-zinc-500 uppercase mt-1 block">Vehicle Configurator</span>
+            </div>
+            <button onclick="GarageSystem.toggle()" class="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Close [ X ]</button>
+        </div>
+        <div class="flex-grow relative w-full h-full bg-grid" id="garage-3d-container"></div>
+        <div class="p-8 border-t border-[#1a1a1a] bg-black/50 backdrop-blur-md flex justify-between items-center">
+            <span class="text-[10px] text-zinc-400 font-mono tracking-widest">CHASSIS: 992 GT3</span>
+            <button class="bg-white text-black px-8 py-4 text-[9px] font-black tracking-[0.4em] uppercase hover:bg-zinc-300 transition-colors">View Specs</button>
+        </div>
+    </aside>
+
+    <script src="script.js"></script>
+    <script src="cursor.js"></script>
+
+    <script type="module">
+        import { GlobalThreeEngine } from './three-engine.js';
+        
+        // 1. HERO Model (Zoomed IN + Interactive)
+        GlobalThreeEngine.init('hero-3d-container', './hero_model/porsche_911_gt3_final.ktx2.glb', {
+            autoRotate: false,      
+            float: true,            
+            mouseReact: true,       
+            cameraZ: 5.5,   
+            baseScale: 4.2  
+        });
+
+        // 2. GARAGE Model (Zoomed OUT + Grounded)
+        GlobalThreeEngine.init('garage-3d-container', './hero_model/porsche_911_gt3_final.ktx2.glb', {
+            autoRotate: true,
+            float: false,           
+            mouseReact: false,
+            cameraZ: 8.5,   
+            baseScale: 2.2  
+        });
+    </script>
+</body>
+
+</html>

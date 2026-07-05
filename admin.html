@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Porsche Midnight Archive — System Terminal Admin.">
+    <title>PORSCHE | System Manifest Override</title>
+
+    <!-- Resource hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;600;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .chamfered-shape {
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+        }
+
+        /* ── Navigation ────────────────────────────────────────────── */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo-main {
+            font-size: 11px;
+            letter-spacing: 0.8em;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        /* ── Admin inputs ──────────────────────────────────────────── */
+        .admin-input {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            padding: 1rem;
+            color: white;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .admin-input:focus {
+            border-color: #444;
+            background: #111;
+        }
+
+        label {
+            font-size: 8px;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* ── Manifest table ────────────────────────────────────────── */
+        .manifest-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .manifest-table th {
+            text-align: left;
+            font-size: 8px;
+            text-transform: uppercase;
+            color: #444;
+            padding: 1rem;
+            letter-spacing: 0.2em;
+        }
+
+        .manifest-row {
+            background: #080808;
+            transition: background 0.3s;
+        }
+
+        .manifest-row:hover {
+            background: #0c0c0c;
+        }
+
+        .manifest-row td {
+            padding: 1rem;
+            font-size: 10px;
+            border-top: 1px solid #111;
+            border-bottom: 1px solid #111;
+        }
+
+        /* ── Inject button ─────────────────────────────────────────── */
+        .btn-inject {
+            background: #fff;
+            color: #000;
+            padding: 1rem 2rem;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            transition: background 0.3s, color 0.3s;
+            border: none;
+        }
+
+        .btn-inject:hover {
+            background: #ff0000;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-grid">
+
+    <!-- ── Navigation ──────────────────────────────────────────────── -->
+    <nav role="navigation" aria-label="Admin navigation">
+        <div class="flex flex-col" id="nav-logo" role="link" tabindex="0" aria-label="Return to archive">
+            <span class="nav-logo-main font-sync">PORSCHE</span>
+            <span class="text-[7px] text-zinc-600 tracking-[0.4em] uppercase mt-1">Terminal // Admin Access</span>
+        </div>
+        <div class="flex gap-8">
+            <a href="index.html"
+                class="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 hover:text-white transition-colors">
+                Exit Terminal
+            </a>
+        </div>
+    </nav>
+
+    <!-- ── Admin Main ───────────────────────────────────────────────── -->
+    <main class="max-w-7xl mx-auto py-20 px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-20">
+
+            <!-- ── Inject Form ── -->
+            <div class="lg:col-span-1">
+                <h2 class="font-sync text-2xl italic uppercase mb-12">Inject Item</h2>
+                <form id="injection-form" class="space-y-6" novalidate>
+                    <div>
+                        <label for="itemName">Hardware Name</label>
+                        <input type="text" id="itemName" class="admin-input" placeholder="GT3 RS Technical Shell"
+                            required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="itemPrice">Base Price ($)</label>
+                            <input type="number" id="itemPrice" class="admin-input" placeholder="000" min="0" required>
+                        </div>
+                        <div>
+                            <label for="itemType">Classification</label>
+                            <select id="itemType" class="admin-input">
+                                <option value="Hardware">Hardware</option>
+                                <option value="Armor">Armor</option>
+                                <option value="Shell">Shell</option>
+                                <option value="Utility">Utility</option>
+                                <option value="Base">Base</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="itemImg">Image Resource Name</label>
+                        <input type="text" id="itemImg" class="admin-input" placeholder="resource_v1.webp">
+                    </div>
+                    <button type="submit" class="btn-inject w-full mt-8">Commit to Archive</button>
+                </form>
+
+                <div id="inject-status" class="mt-4 text-[9px] font-mono uppercase text-zinc-600" aria-live="polite">
+                </div>
+            </div>
+
+            <!-- ── Manifest Table ── -->
+            <div class="lg:col-span-2">
+                <div class="flex justify-between items-end mb-12">
+                    <h2 class="font-sync text-2xl italic uppercase">Active Manifest</h2>
+                    <span id="item-count" class="text-[9px] text-zinc-600 font-mono" aria-live="polite">00 ITEMS
+                        LOADED</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="manifest-table" aria-label="Archive manifest">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Identity</th>
+                                <th scope="col">Class</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manifest-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── Checkout Logs Section (Dynamic DB Logs) ── -->
+        <div class="mt-32 border-t border-zinc-900 pt-20">
+            <div class="flex justify-between items-end mb-12">
+                <h2 class="font-sync text-2xl italic uppercase">Checkout Logs</h2>
+                <span id="order-count" class="text-[9px] text-zinc-600 font-mono">00 ORDERS PLACED</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="manifest-table" aria-label="Customer orders history" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Address</th>
+                            <th scope="col">Items Ordered</th>
+                            <th scope="col">Payment</th>
+                            <th scope="col">Total Value</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-body">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        'use strict';
+
+        let ARCHIVE_MANIFEST = [];
+
+        async function fetchProducts() {
+            try {
+                const res = await fetch('/api/products');
+                if (res.ok) {
+                    ARCHIVE_MANIFEST = await res.json();
+                }
+            } catch (err) {
+                console.error("Failed to fetch products:", err);
+            }
+            renderManifest();
+        }
+
+        async function fetchOrders() {
+            try {
+                const res = await fetch('/api/orders');
+                if (res.ok) {
+                    const orders = await res.json();
+                    renderOrders(orders);
+                }
+            } catch (err) {
+                console.error("Failed to fetch orders:", err);
+            }
+        }
+
+        /* ── Render manifest table ── */
+        function renderManifest() {
+            const tbody = document.getElementById('manifest-body');
+            const count = document.getElementById('item-count');
+            if (!tbody) return;
+
+            const frag = document.createDocumentFragment();
+            ARCHIVE_MANIFEST.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'manifest-row';
+                tr.innerHTML = `
+                    <td class="text-zinc-700 font-mono">#${String(item.id).padStart(2, '0')}</td>
+                    <td class="font-bold tracking-widest">${item.name}</td>
+                    <td><span class="px-2 py-1 bg-zinc-900 text-[8px]">${item.type}</span></td>
+                    <td class="font-mono">$${item.price}</td>
+                    <td class="text-green-500 text-[8px]">ONLINE</td>
+                    <td><button data-purge="${item.id}" class="text-zinc-600 hover:text-red-500 uppercase text-[8px] font-bold tracking-widest transition-colors">Purge</button></td>
+                `;
+                frag.appendChild(tr);
+            });
+
+            tbody.innerHTML = '';
+            tbody.appendChild(frag);
+            count.textContent = `${String(ARCHIVE_MANIFEST.length).padStart(2, '0')} ITEMS LOADED`;
+        }
+
+        /* ── Render orders table ── */
+        function renderOrders(orders) {
+            const tbody = document.getElementById('orders-body');
+            const count = document.getElementById('order-count');
+            if (!tbody) return;
+
+            const frag = document.createDocumentFragment();
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = 'manifest-row';
+                
+                // Format order items line breaks
+                const itemsStr = (order.order_items || [])
+                    .map(item => `${item.name} (${item.size}) - $${item.price}`)
+                    .join('<br>');
+
+                // Format timestamp locally
+                const dateStr = new Date(order.created_at).toLocaleString();
+
+                tr.innerHTML = `
+                    <td class="text-zinc-700 font-mono">#${String(order.id).padStart(4, '0')}</td>
+                    <td class="font-bold tracking-widest">${order.first_name} ${order.last_name}</td>
+                    <td class="text-zinc-400 font-mono text-[9px]">${order.address}, ${order.city}, ${order.postal_code}</td>
+                    <td class="text-zinc-400 font-mono text-[9px] leading-relaxed">${itemsStr || 'N/A'}</td>
+                    <td><span class="px-2 py-1 bg-zinc-900 text-[8px]">${order.payment_method} (${order.shipping_method})</span></td>
+                    <td class="font-mono text-green-500 font-bold">$${order.total_price.toFixed(2)}</td>
+                    <td class="text-zinc-500 font-mono text-[9px]">${dateStr}</td>
+                `;
+                frag.appendChild(tr);
+            });
+
+            tbody.innerHTML = '';
+            tbody.appendChild(frag);
+            count.textContent = `${String(orders.length).padStart(2, '0')} ORDERS PLACED`;
+        }
+
+        /* ── Delegated purge ── */
+        document.getElementById('manifest-body').addEventListener('click', async e => {
+            const btn = e.target.closest('[data-purge]');
+            if (!btn) return;
+            const id = parseInt(btn.dataset.purge);
+            if (confirm('CONFIRM SYSTEM PURGE?')) {
+                try {
+                    const res = await fetch(`/api/products?id=${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (res.ok) {
+                        fetchProducts();
+                    } else {
+                        const data = await res.json();
+                        alert(`Purge failed: ${data.error || 'Server error'}`);
+                    }
+                } catch (err) {
+                    console.error("Purge request failed:", err);
+                }
+            }
+        });
+
+        /* ── Inject form ── */
+        document.getElementById('injection-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseInt(document.getElementById('itemPrice').value, 10);
+            const type = document.getElementById('itemType').value;
+            const img = document.getElementById('itemImg').value.trim() || 'OIP (4).webp';
+            const status = document.getElementById('inject-status');
+
+            if (!name || isNaN(price) || price < 0) {
+                status.textContent = 'ERROR: Invalid input.';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, price, type, img })
+                });
+
+                if (res.ok) {
+                    const newItem = await res.json();
+                    status.textContent = `✓ HARDWARE #${newItem.id} INJECTED`;
+                    e.target.reset();
+                    fetchProducts();
+                } else {
+                    const data = await res.json();
+                    status.textContent = `ERROR: ${data.error || 'Server error'}`;
+                }
+            } catch (err) {
+                console.error("Injection failed:", err);
+                status.textContent = 'ERROR: Connection failed.';
+            }
+
+            setTimeout(() => { status.textContent = ''; }, 3000);
+        });
+
+        /* ── Nav logo click ── */
+        document.getElementById('nav-logo').addEventListener('click', () => { location.href = 'index.html'; });
+        document.getElementById('nav-logo').addEventListener('keydown', e => { if (e.key === 'Enter') location.href = 'index.html'; });
+
+        /* ── Boot ── */
+        fetchProducts();
+        fetchOrders();
+    </script>
+    <script src="cursor.js"></script>
+</body>
+
+</html>
