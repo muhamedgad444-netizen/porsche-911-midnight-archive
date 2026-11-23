@@ -1,92 +1,62 @@
-# PORSCHE 911 // MIDNIGHT ARCHIVE
-url:https://porsche-911-midnight-archive.vercel.app/
+# PORSCHE // 911 MIDNIGHT ARCHIVE
 
-> Experimental high-velocity hardware showcase. An immersive 3D E-Commerce experience powered by Three.js, Vercel Serverless Functions, and Supabase.
-
----
-
-## 🌌 Overview
-
-**Porsche 911 Midnight Archive** is a high-end concept e-commerce digital experience tailored to the aesthetics of precision German engineering. It features high-fidelity interactive 3D model configuration directly in the browser, fluid cinematic WebGL particle simulations, and a fully functional serverless backend.
+Interactive **React 18 + TypeScript + Vite + Three.js + Framer Motion + Lenis** motorsport showroom, multi-chassis 3D Garage Configurator, and technical apparel vault built in a **Midnight Cyber-Kinetic** aesthetic.
 
 ---
 
-## ⚡ Technical Stack
+## Architecture & Flagship Features
 
-* **Frontend:** Vanilla HTML5 / ES6 Modules / Tailwind CSS (CDN) / Custom HSL CSS Design
-* **3D Rendering & Graphics:** Three.js / GLTFLoader / KTX2Loader / MeshoptDecoder
-* **Multithreading:** Web Workers (calculating Zero-G particle matrices off-main-thread)
-* **Backend:** Vercel Serverless Functions (Node.js API routes)
-* **Database:** Supabase (PostgreSQL relational data store)
+### 1. Zero-G Cyber-Kinetic Boot Portal (`/welcome` & Initial Entry)
+- GPU-instanced **2,800-particle Three.js WebGL field** with custom GLSL 3D Simplex Noise and pointer gravity bending.
+- Interactive **Hyperspace Warp (`uWarp`)** camera & particle acceleration transitioning straight into the live 3D 992 GT3 showroom.
+
+### 2. Upgraded Three.js Studio Engine (`PorscheStage.tsx`)
+- `antialias: true`, `ACESFilmicToneMapping`, `PMREMGenerator` + `RoomEnvironment` PBR metallic reflections, and a grounded cyber turntable pad + soft contact shadow.
+- Local KTX2 (`/basis/`) and Draco (`/draco/`) decoders bundled in `public/` for fast, zero-CDN-failure 3D loading.
+- Scroll-scrubbed camera choreography + damped drag-to-orbit + 3 live Studio Lighting Rigs (**Cyber Night**, **Stuttgart Lab**, **Acid Track**).
+
+### 3. Multi-Chassis 3D Garage Configurator
+Switch live across all three repo Porsche GLBs inside one interactive showroom bay:
+- **01 // Porsche 992 GT3** (`public/hero_model/porsche_911_gt3_final.ktx2.glb`)
+- **02 // Porsche 911 S/T** (`public/gtr_model/porsche_911_st_final.ktx2.glb`)
+- **03 // Porsche 918 Spyder** (`public/steeringwheel_model/porsche_918_spyder_final.ktx2.glb`)
+
+Includes 4 damped camera presets (**3/4 Hero**, **Side Profile**, **Rear Aero**, **Overhead**), live **CAD Wireframe** toggle, **Auto-Orbit** toggle, and an expandable **Full Telemetry Specs** dossier.
+
+### 4. Motion Choreography & Media
+- **Lenis** inertial smooth scrolling wired into velocity-skewed chamfered archive grids (`VelocitySkew`).
+- Tactical desktop HUD reticle cursor (`CyberCursor`) with live contextual labels (`ORBIT`, `CONFIGURE`, `INSPECT`, `ADD`, `WARP`, `PLAY`) — automatically disabled on touch screens.
+- Dual-Channel Telemetry Film Showcase featuring both repo videos (`CAM_01 // Stuttgart Midnight Run` and `CAM_02 // Weissach Night Telemetry`) with interactive playback & mute controls.
+
+### 5. Storefront, 3D Logistics Checkout & Admin Terminal
+- **Collections (`/collections`):** Live category filters (`Hardware`, `Armor`, `Shell`, `Utility`, `Base`), search, sort, and Quick-Inspect Technical Dossier modal.
+- **Checkout (`/checkout`):** Floating 3-step Logistics Protocol, live **3D Porsche 911 S/T** escort viewport whose camera preset tracks each step, interactive **3D Porsche Pay Wallet** (`VISA TITANIUM`, `INSTAPAY DIRECT`, `C.O.D. COURIER`), and clean confirmation receipt.
+- **Admin Terminal (`/admin`):** Passkey-protected owner dashboard (`911GT3` demo key), KPI telemetry strip, inventory injection with texture preset previews, two-click safe purge, and live order logs.
+- **Backend Compatibility:** Preserves Vercel Serverless Supabase endpoints in `api/products.js`, `api/orders.js`, and `api/seed.js` with resilient local vault fallback when Supabase env vars are not set locally.
 
 ---
 
-## ✨ Features
+## Local Development
 
-### 1. Zero-G Cinematic Particle Portal
-The entrance gate page runs a fluid particle physics simulation of 2,500 particles reacting dynamically to mouse proximity and scrolling inertia. It runs on a dedicated Web Worker to maintain a solid 60 FPS under full GPU drawing loads.
-
-### 2. Interactive 3D Viewports
-* **Hero Banner Model:** Zoomed-in, floating rendering of the Porsche 911 GT3 that rotates dynamically in response to mouse movements.
-* **Garage Panel Configurator:** A slide-out panel utilizing automatic model rotation presets to configure and inspect chassis specifications.
-* **Logistics Viewer:** Displays 3D assets during checkout to visualize order details in real-time.
-
-### 3. Serverless E-Commerce Flow
-* **Dynamic Catalog:** Product items are loaded dynamically from Supabase via Vercel Serverless APIs with instant fallback states to local statics in case of connectivity errors.
-* **Admin Override Terminal:** A secure control panel allowing admins to inject new catalog items, purge expired hardware, and view real-time checkout customer logs.
-* **Interactive Checkout Wallet:** A custom 3D card folding animation that enables selecting different payment methods (Visa, Instapay, COD) with micro-animations.
-
----
-
-## 🚀 Setup & Installation
-
-### 1. Database Setup (Supabase)
-Run the following query in your **Supabase SQL Editor** to initialize the database tables:
-
-```sql
-CREATE TABLE products (
-    id GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    name TEXT NOT NULL,
-    price DOUBLE PRECISION NOT NULL,
-    type TEXT NOT NULL,
-    img TEXT NOT NULL
-);
-
-CREATE TABLE orders (
-    id GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    address TEXT NOT NULL,
-    city TEXT NOT NULL,
-    postal_code TEXT NOT NULL,
-    shipping_method TEXT NOT NULL,
-    payment_method TEXT NOT NULL,
-    total_price DOUBLE PRECISION NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE order_items (
-    id GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    order_id INT8 REFERENCES orders(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    price DOUBLE PRECISION NOT NULL,
-    size TEXT NOT NULL
-);
+```bash
+npm install
+npm run dev
 ```
 
-### 2. Environment Variables
-Configure these variables in your Vercel Dashboard (or local `.env` file):
+Vite launches locally at `http://localhost:5175/`.
 
-```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_private_service_role_key
+### Production Build
+
+```bash
+npm run build
+npm run preview
 ```
 
-### 3. Seeding the Catalog
-Once deployed, seed your database with the default 16 starting products by visiting the seeding endpoint in your browser:
-`https://<your-vercel-domain>.com/api/seed`
+### Vercel + Supabase Environment Variables
 
----
+Configure these environment variables in your Vercel project settings to connect the live Postgres database:
 
-## 📄 License
-This project is for educational and portfolio demonstration purposes. All brand names and assets belong to their respective owners (Porsche AG).
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+SPA route rewrites are preconfigured in `vercel.json` while keeping `/api/*` routed to Vercel Serverless Functions.
